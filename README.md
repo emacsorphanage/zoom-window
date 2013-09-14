@@ -5,6 +5,13 @@
 `zoom-window` provides window zoom like tmux zoom and unzoom.
 
 
+## Screenshot
+
+![zoom-window](image/zoom-window.gif)
+
+Background color of `mode-line` is changed when zoomed
+
+
 ## Requirements
 
 * Emacs 23 or higher
