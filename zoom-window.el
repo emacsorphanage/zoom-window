@@ -114,6 +114,10 @@
       zoom-window--enabled
     (zoom-window--elscreen-current-tab-property 'zoom-window-is-zoomed)))
 
+(defsubst zoom-window--goto-line (line)
+  (goto-char (point-min))
+  (forward-line (1- line)))
+
 ;;;###autoload
 (defun zoom-window-zoom ()
   (interactive)
@@ -121,9 +125,10 @@
     (if (and (one-window-p) (not enabled))
         (message "There is only one window!!")
       (if enabled
-          (progn
+          (let ((current-line (line-number-at-pos)))
             (zoom-window--restore-mode-line-face)
-            (zoom-window--do-register-action 'jump-to-register))
+            (zoom-window--do-register-action 'jump-to-register)
+            (zoom-window--goto-line current-line))
         (zoom-window--save-mode-line-color)
         (zoom-window--do-register-action 'window-configuration-to-register)
         (delete-other-windows)
