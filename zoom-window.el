@@ -23,6 +23,14 @@
 
 ;;; Code:
 
+;; for byte-compile warnings
+(declare-function elscreen-get-screen-property "elscreen")
+(declare-function elscreen-get-current-screen "elscreen")
+(declare-function get-alist "elscreen")
+(declare-function elscreen--set-alist "elscreen")
+(declare-function elscreen-set-screen-property "elscreen")
+(declare-function elscreen-get-conf-list "elscreen")
+
 (defgroup zoom-window nil
   "zoom window like tmux"
   :group 'windows)
