@@ -126,6 +126,15 @@
   (goto-char (point-min))
   (forward-line (1- line)))
 
+(defun zoom-window--do-unzoom ()
+  (let ((current-line (line-number-at-pos))
+        (current-buf (current-buffer)))
+    (zoom-window--restore-mode-line-face)
+    (zoom-window--do-register-action 'jump-to-register)
+    (unless (string= (buffer-name current-buf) (buffer-name))
+      (switch-to-buffer current-buf))
+    (zoom-window--goto-line current-line)))
+
 ;;;###autoload
 (defun zoom-window-zoom ()
   (interactive)
@@ -133,10 +142,7 @@
     (if (and (one-window-p) (not enabled))
         (message "There is only one window!!")
       (if enabled
-          (let ((current-line (line-number-at-pos)))
-            (zoom-window--restore-mode-line-face)
-            (zoom-window--do-register-action 'jump-to-register)
-            (zoom-window--goto-line current-line))
+          (zoom-window--do-unzoom)
         (zoom-window--save-mode-line-color)
         (zoom-window--do-register-action 'window-configuration-to-register)
         (delete-other-windows)
