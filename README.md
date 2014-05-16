@@ -1,4 +1,4 @@
-# zome-window.el
+# zoom-window.el
 
 ## Introduction
 
