@@ -27,7 +27,6 @@
 (declare-function elscreen-get-screen-property "elscreen")
 (declare-function elscreen-get-current-screen "elscreen")
 (declare-function get-alist "elscreen")
-(declare-function elscreen--set-alist "elscreen")
 (declare-function elscreen-set-screen-property "elscreen")
 (declare-function elscreen-get-conf-list "elscreen")
 
@@ -48,6 +47,14 @@
 (defvar zoom-window--orig-color nil)
 (defvar zoom-window--enabled nil)
 
+(defun zoom-window--put-alist (key value alist)
+  (let ((elm (assoc key alist)))
+    (if elm
+        (progn
+          (setcdr elm value)
+          alist)
+      (cons (cons key value) alist))))
+
 (defsubst zoom-window--elscreen-current-property ()
   (elscreen-get-screen-property (elscreen-get-current-screen)))
 
@@ -67,18 +74,18 @@
 
 (defun zoom-window--elscreen-set-zoomed ()
   (let* ((current-screen (elscreen-get-current-screen))
-         (property (elscreen-get-screen-property current-screen))
+         (prop (elscreen-get-screen-property current-screen))
          (orig-mode-line (face-background 'mode-line)))
-    (elscreen--set-alist 'property 'zoom-window-saved-color orig-mode-line)
-    (elscreen-set-screen-property current-screen property)))
+    (setq prop (zoom-window--put-alist 'zoom-window-saved-color orig-mode-line prop))
+    (elscreen-set-screen-property current-screen prop)))
 
 (defun zoom-window--elscreen-set-default ()
   (let* ((history (elscreen-get-conf-list 'screen-history))
          (current-screen (car (last history)))
-         (property (elscreen-get-screen-property current-screen)))
-    (elscreen--set-alist 'property 'zoom-window-is-zoomed nil)
-    (elscreen--set-alist 'property 'zoom-window-saved-color zoom-window--orig-color)
-    (elscreen-set-screen-property current-screen property)))
+         (prop (elscreen-get-screen-property current-screen)))
+    (setq prop (zoom-window--put-alist 'zoom-window-is-zoomed nil prop))
+    (setq prop (zoom-window--put-alist 'zoom-window-saved-color zoom-window--orig-color prop))
+    (elscreen-set-screen-property current-screen prop)))
 
 ;;;###autoload
 (defun zoom-window-setup ()
@@ -112,10 +119,10 @@
   (if (not zoom-window-use-elscreen)
       (setq zoom-window--enabled (not zoom-window--enabled))
     (let* ((current-screen (elscreen-get-current-screen))
-           (property (elscreen-get-screen-property current-screen))
-           (val (get-alist 'zoom-window-is-zoomed property)))
-      (elscreen--set-alist 'property 'zoom-window-is-zoomed (not val))
-      (elscreen-set-screen-property current-screen property))))
+           (prop (elscreen-get-screen-property current-screen))
+           (val (get-alist 'zoom-window-is-zoomed prop)))
+      (setq prop (zoom-window--put-alist 'zoom-window-is-zoomed (not val) prop))
+      (elscreen-set-screen-property current-screen prop))))
 
 (defun zoom-window--enable-p ()
   (if (not zoom-window-use-elscreen)
