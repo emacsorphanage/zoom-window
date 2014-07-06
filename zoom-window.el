@@ -26,7 +26,6 @@
 ;; for byte-compile warnings
 (declare-function elscreen-get-screen-property "elscreen")
 (declare-function elscreen-get-current-screen "elscreen")
-(declare-function get-alist "elscreen")
 (declare-function elscreen-set-screen-property "elscreen")
 (declare-function elscreen-get-conf-list "elscreen")
 
@@ -60,12 +59,12 @@
 
 (defsubst zoom-window--elscreen-current-tab-property (prop)
   (let ((property (zoom-window--elscreen-current-property)))
-    (get-alist prop property)))
+    (assoc-default prop property)))
 
 (defun zoom-window--elscreen-update ()
   (let* ((property (zoom-window--elscreen-current-property))
-         (orig-background (get-alist 'zoom-window-saved-color property))
-         (is-zoomed (get-alist 'zoom-window-is-zoomed property)))
+         (orig-background (assoc-default 'zoom-window-saved-color property))
+         (is-zoomed (assoc-default 'zoom-window-is-zoomed property)))
     (if is-zoomed
         (set-face-background 'mode-line zoom-window-mode-line-color)
       (when orig-background
@@ -120,7 +119,7 @@
       (setq zoom-window--enabled (not zoom-window--enabled))
     (let* ((current-screen (elscreen-get-current-screen))
            (prop (elscreen-get-screen-property current-screen))
-           (val (get-alist 'zoom-window-is-zoomed prop)))
+           (val (assoc-default 'zoom-window-is-zoomed prop)))
       (setq prop (zoom-window--put-alist 'zoom-window-is-zoomed (not val) prop))
       (elscreen-set-screen-property current-screen prop))))
 
