@@ -45,7 +45,7 @@ Set `non-nil` if you use `elscreen`
 (setq zoom-window-mode-line-color "DarkGreen")
 ```
 
-### Using elscreen
+### zoom-window with [elscreen](https://github.com/knu/elscreen)
 
 ```lisp
 (require 'elscreen)
