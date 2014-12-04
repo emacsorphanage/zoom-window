@@ -1,4 +1,4 @@
-;;; zoom-window.el --- Zoom window like tmux -*- lexical-binding: t; -*-
+;;; zoom-window.el --- Zoom window like tmux
 
 ;; Copyright (C) 2014 by Syohei YOSHIDA
 
