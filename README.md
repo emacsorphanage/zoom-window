@@ -1,4 +1,4 @@
-# zoom-window.el
+# zoom-window.el [![melpa badge][melpa-badge]][melpa-link] [![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
 
 ## Introduction
 
@@ -17,6 +17,14 @@ Background color of `mode-line` is changed when zoomed
 * Emacs 23 or higher
 
 `zoom-window.el` supports elscreen. You can zoom window per tab.
+
+## Installation
+
+`zoom-window` is available on [MELPA](http://melpa.org/) and [MELPA stable](http://stable.melpa.org/)
+
+You can install `zoom-window` with the following command.
+
+<kbd>M-x package-install [RET] helm-ag [RET]</kbd>
 
 
 ## Basic Usage
@@ -57,3 +65,8 @@ Set `non-nil` if you use `elscreen`
 
 (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
 ```
+
+[melpa-link]: https://melpa.org/#/zoom-window
+[melpa-stable-link]: https://stable.melpa.org/#/zoom-window
+[melpa-badge]: https://melpa.org/packages/zoom-window-badge.svg
+[melpa-stable-badge]: https://stable.melpa.org/packages/zoom-window-badge.svg
