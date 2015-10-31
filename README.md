@@ -24,7 +24,7 @@ Background color of `mode-line` is changed when zoomed
 
 You can install `zoom-window` with the following command.
 
-<kbd>M-x package-install [RET] helm-ag [RET]</kbd>
+<kbd>M-x package-install [RET] zoom-window [RET]</kbd>
 
 
 ## Basic Usage
