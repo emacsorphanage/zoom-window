@@ -20,7 +20,7 @@ Background color of `mode-line` is changed when zoomed
 
 ## Installation
 
-`zoom-window` is available on [MELPA](http://melpa.org/) and [MELPA stable](http://stable.melpa.org/)
+`zoom-window` is available on [MELPA](https://melpa.org/) and [MELPA stable](https://stable.melpa.org/)
 
 You can install `zoom-window` with the following command.
 
