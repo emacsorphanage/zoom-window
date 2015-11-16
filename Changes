@@ -1,4 +1,7 @@
 Revision history for zoom-window.el
 
+Version 0.02  2015/11/16 syohex
+  - Fix case when original buffer is already killed(#3 Thanks jerryxgh)
+
 Version 0.01  2014/12/04 syohex
   - Initial release
