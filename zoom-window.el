@@ -148,7 +148,7 @@
     (if (and (one-window-p) (not enabled))
         (message "There is only one window!!")
       (if enabled
-          (ignore-errors
+          (with-demoted-errors "Warning: %S"
             (zoom-window--do-unzoom))
         (zoom-window--save-mode-line-color)
         (zoom-window--do-register-action 'window-configuration-to-register)
