@@ -70,6 +70,18 @@ Set `non-nil` if you use `persp-mode`
 (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
 ```
 
+### zoom-window with [persp-mode](https://github.com/Bad-ptr/persp-mode.el)
+
+```lisp
+(require 'elscreen)
+(elscreen-start)
+
+(require 'zoom-window)
+(setq zoom-window-use-persp t)
+(zoom-window-setup)
+
+(global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
+
 [melpa-link]: https://melpa.org/#/zoom-window
 [melpa-stable-link]: https://stable.melpa.org/#/zoom-window
 [melpa-badge]: https://melpa.org/packages/zoom-window-badge.svg
