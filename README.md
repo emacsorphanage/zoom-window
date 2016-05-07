@@ -44,6 +44,10 @@ Color of `mode-line` when zoom-window is enabled
 
 Set `non-nil` if you use `elscreen`
 
+### `zoom-window-use-persp`(Default is `nil`)
+
+Set `non-nil` if you use `persp-mode`
+
 
 ## Example
 
