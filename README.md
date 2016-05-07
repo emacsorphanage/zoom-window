@@ -44,6 +44,10 @@ Color of `mode-line` when zoom-window is enabled
 
 Set `non-nil` if you use `elscreen`
 
+### `zoom-window-use-persp`(Default is `nil`)
+
+Set `non-nil` if you use `persp-mode`
+
 
 ## Example
 
@@ -61,6 +65,19 @@ Set `non-nil` if you use `elscreen`
 
 (require 'zoom-window)
 (setq zoom-window-use-elscreen t)
+(zoom-window-setup)
+
+(global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
+```
+
+### zoom-window with [persp-mode](https://github.com/Bad-ptr/persp-mode.el)
+
+```lisp
+(require 'elscreen)
+(elscreen-start)
+
+(require 'zoom-window)
+(setq zoom-window-use-persp t)
 (zoom-window-setup)
 
 (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
