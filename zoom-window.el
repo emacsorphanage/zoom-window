@@ -52,6 +52,7 @@
 
 (defvar zoom-window--orig-color nil)
 (defvar zoom-window--enabled nil)
+(defvar zoom-window--from-other-window nil)
 
 (defun zoom-window--put-alist (key value alist)
   (let ((elm (assoc key alist)))
@@ -240,15 +241,22 @@ PERSP: the perspective to be killed."
 
 (defun zoom-window--do-unzoom ()
   (let ((current-line (line-number-at-pos))
-        (current-buf (current-buffer)))
+        (current-buf (current-buffer))
+        (from-other-win zoom-window--from-other-window))
     (zoom-window--restore-mode-line-face)
     (zoom-window--do-register-action 'jump-to-register)
-    (unless (string= (buffer-name current-buf) (buffer-name))
+    (when (and (not from-other-win)
+               (not (string= (buffer-name current-buf) (buffer-name))))
       (switch-to-buffer current-buf))
     (zoom-window--goto-line current-line)))
 
 ;;;###autoload
-(defun zoom-window-zoom ()
+(defun zoom-window-zoom-next ()
+  (interactive)
+  (zoom-window-zoom t))
+
+;;;###autoload
+(defun zoom-window-zoom (&optional other-win)
   (interactive)
   (let ((enabled (zoom-window--enable-p)))
     (if (and (one-window-p) (not enabled))
@@ -258,7 +266,10 @@ PERSP: the perspective to be killed."
             (zoom-window--do-unzoom))
         (zoom-window--save-mode-line-color)
         (zoom-window--do-register-action 'window-configuration-to-register)
+        (when other-win
+          (other-window +1))
         (delete-other-windows)
+        (set (make-local-variable 'zoom-window--from-other-window) t)
         (set-face-background 'mode-line zoom-window-mode-line-color))
       (force-mode-line-update)
       (zoom-window--toggle-enabled))))
