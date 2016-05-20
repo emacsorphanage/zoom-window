@@ -51,7 +51,6 @@
   :type 'string)
 
 (defvar zoom-window--orig-color nil)
-(defvar zoom-window--enabled nil)
 
 (defun zoom-window--put-alist (key value alist)
   (let ((elm (assoc key alist)))
@@ -187,6 +186,12 @@ PERSP: the perspective to be killed."
                (t zoom-window--orig-color))))
     (set-face-background 'mode-line color (window-frame))))
 
+(defun zoom-window--register-name (frame)
+  (let ((parent-id (frame-parameter frame 'parent-id)))
+    (if (not parent-id)
+        :zoom-window ;; not support multiple frame
+      (intern (format ":zoom-window-%d" parent-id)))))
+
 (defun zoom-window--do-register-action (func)
   (cond (zoom-window-use-elscreen
          (let* ((current-screen (elscreen-get-current-screen))
@@ -198,7 +203,7 @@ PERSP: the perspective to be killed."
                 (reg (intern (format "perspective-%s" persp-name))))
            (funcall func reg)))
 
-        (t (funcall func :zoom-window))))
+        (t (funcall func (zoom-window--register-name (window-frame))))))
 
 (defun zoom-window--toggle-enabled ()
   (cond
@@ -222,7 +227,9 @@ PERSP: the perspective to be killed."
                                     property
                                     zoom-window-persp-alist))))
 
-   (t (setq zoom-window--enabled (not zoom-window--enabled)))))
+   (t (let* ((curframe (window-frame))
+             (status (frame-parameter curframe 'zoom-window-enabled)))
+        (set-frame-parameter curframe 'zoom-window-enabled (not status))))))
 
 (defun zoom-window--enable-p ()
   (cond
@@ -234,7 +241,7 @@ PERSP: the perspective to be killed."
            (property (assoc-default persp-name zoom-window-persp-alist)))
       (and property (assoc-default 'zoom-window-is-zoomed property))))
 
-   (t zoom-window--enabled)))
+   (t (frame-parameter (window-frame) 'zoom-window-enabled))))
 
 (defsubst zoom-window--goto-line (line)
   (goto-char (point-min))
@@ -262,8 +269,7 @@ PERSP: the perspective to be killed."
         (zoom-window--save-mode-line-color)
         (zoom-window--do-register-action 'window-configuration-to-register)
         (delete-other-windows)
-        (set-face-background 'mode-line zoom-window-mode-line-color curframe)
-        (setq zoom-window--frame curframe))
+        (set-face-background 'mode-line zoom-window-mode-line-color curframe))
       (force-mode-line-update)
       (zoom-window--toggle-enabled))))
 
