@@ -171,6 +171,21 @@ PERSP: the perspective to be killed."
 
         (t (setq zoom-window--orig-color (face-background 'mode-line)))))
 
+(defun zoom-window--save-window-list ()
+  (let ((buffers (cl-loop for window in (window-list)
+                          collect (window-buffer window))))
+    (cond (zoom-window-use-elscreen)
+          (zoom-window-use-persp)
+          (t
+           (set-frame-parameter
+            (window-frame) 'zoom-window-buffers buffers)))))
+
+(defun zoom-window--get-window-list ()
+  (cond (zoom-window-use-elscreen)
+        (zoom-window-use-persp)
+        (t
+         (frame-parameter (window-frame) 'zoom-window-buffers))))
+
 (defun zoom-window--restore-mode-line-face ()
   (let ((color
          (cond (zoom-window-use-elscreen
@@ -267,11 +282,22 @@ PERSP: the perspective to be killed."
           (with-demoted-errors "Warning: %S"
             (zoom-window--do-unzoom))
         (zoom-window--save-mode-line-color)
+        (zoom-window--save-window-list)
         (zoom-window--do-register-action 'window-configuration-to-register)
         (delete-other-windows)
         (set-face-background 'mode-line zoom-window-mode-line-color curframe))
       (force-mode-line-update)
       (zoom-window--toggle-enabled))))
+
+(defun zoom-window-next ()
+  (interactive)
+  (let* ((buffers (zoom-window--get-window-list))
+         (targets (member (current-buffer) buffers)))
+    (if targets
+        (if (cdr targets)
+            (switch-to-buffer (cadr targets))
+          (switch-to-buffer (car buffers)))
+      (switch-to-buffer (car buffers)))))
 
 (provide 'zoom-window)
 
