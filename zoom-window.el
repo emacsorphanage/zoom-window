@@ -296,6 +296,7 @@ PERSP: the perspective to be killed."
       (zoom-window--toggle-enabled))))
 
 (defun zoom-window-next ()
+  "Switch to next buffer which is in zoomed frame/screen/perspective."
   (interactive)
   (let* ((buffers (zoom-window--get-buffers))
          (targets (member (current-buffer) buffers)))
