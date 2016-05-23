@@ -174,14 +174,19 @@ PERSP: the perspective to be killed."
 (defun zoom-window--save-window-list ()
   (let ((buffers (cl-loop for window in (window-list)
                           collect (window-buffer window))))
-    (cond (zoom-window-use-elscreen)
+    (cond (zoom-window-use-elscreen
+           (let* ((curprops (zoom-window--elscreen-current-property))
+                  (props (zoom-window--put-alist 'zoom-window-buffers buffers curprops)))
+             (elscreen-set-screen-property (elscreen-get-current-screen) props)))
           (zoom-window-use-persp)
           (t
            (set-frame-parameter
             (window-frame) 'zoom-window-buffers buffers)))))
 
-(defun zoom-window--get-window-list ()
-  (cond (zoom-window-use-elscreen)
+(defun zoom-window--get-buffers ()
+  (cond (zoom-window-use-elscreen
+         (let ((props (zoom-window--elscreen-current-property)))
+           (assoc-default 'zoom-window-buffers props)))
         (zoom-window-use-persp)
         (t
          (frame-parameter (window-frame) 'zoom-window-buffers))))
@@ -291,7 +296,7 @@ PERSP: the perspective to be killed."
 
 (defun zoom-window-next ()
   (interactive)
-  (let* ((buffers (zoom-window--get-window-list))
+  (let* ((buffers (zoom-window--get-buffers))
          (targets (member (current-buffer) buffers)))
     (if targets
         (if (cdr targets)
