@@ -94,7 +94,7 @@
     (setq prop (zoom-window--put-alist 'zoom-window-saved-color zoom-window--orig-color prop))
     (elscreen-set-screen-property current-screen prop)))
 
-(defun zoom-window--persp-before-switch-hook (persp-name frame-or-window)
+(defun zoom-window--persp-before-switch-hook (persp-name _frame-or-window)
   "Hook to run when do persp switching.
 PERSP-NAME: name of a perspective to switch.
 FRAME-OR-WINDOW: a frame or a window for which the switching takes place."
