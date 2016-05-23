@@ -14,9 +14,15 @@ Background color of `mode-line` is changed when zoomed
 
 ## Requirements
 
-* Emacs 23 or higher
+- Emacs 24 or higher
 
-`zoom-window.el` supports elscreen. You can zoom window per tab.
+`zoom-window.el` supports elscreen and persp-mode.
+
+## Features
+
+- Support elscreen
+- Support persp-mode
+- Support multiple frames(This feature cannot use with elscreen and persp-mode yet)
 
 ## Installation
 
@@ -29,9 +35,13 @@ You can install `zoom-window` with the following command.
 
 ## Basic Usage
 
-#### `zoom-window`
+#### `zoom-window-zoom`
 
 Toggle between zooming current window and unzooming
+
+#### `zoom-window-next`
+
+Switch to next buffer which is in zoomed frame/screen/perspective.
 
 
 ## Customization
@@ -74,7 +84,7 @@ Set `non-nil` if you use `persp-mode`
 
 ```lisp
 (with-eval-after-load "persp-mode-autoloads"
-  (add-hook 'after-init-hook #'(lambda () (persp-mode 1)))) 
+  (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
 
 (require 'zoom-window)
 (setq zoom-window-use-persp t)

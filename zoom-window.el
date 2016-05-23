@@ -1,10 +1,11 @@
-;;; zoom-window.el --- Zoom window like tmux
+;;; zoom-window.el --- Zoom window like tmux -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015 by Syohei YOSHIDA
+;; Copyright (C) 2016 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-zoom-window
 ;; Version: 0.02
+;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -171,6 +172,36 @@ PERSP: the perspective to be killed."
 
         (t (setq zoom-window--orig-color (face-background 'mode-line)))))
 
+(defun zoom-window--save-buffers ()
+  (let ((buffers (cl-loop for window in (window-list)
+                          collect (window-buffer window))))
+    (cond (zoom-window-use-elscreen
+           (let* ((curprops (zoom-window--elscreen-current-property))
+                  (props (zoom-window--put-alist 'zoom-window-buffers buffers curprops)))
+             (elscreen-set-screen-property (elscreen-get-current-screen) props)))
+          (zoom-window-use-persp
+           (let* ((persp-name (safe-persp-name (get-frame-persp)))
+                  (property (or (assoc-default persp-name zoom-window-persp-alist)
+                                (zoom-window--init-persp-property persp-name))))
+             (setq property (zoom-window--put-alist
+                             'zoom-window-buffers buffers property))
+             (setq zoom-window-persp-alist (zoom-window--put-alist
+                                            persp-name property zoom-window-persp-alist))))
+          (t
+           (set-frame-parameter
+            (window-frame) 'zoom-window-buffers buffers)))))
+
+(defun zoom-window--get-buffers ()
+  (cond (zoom-window-use-elscreen
+         (let ((props (zoom-window--elscreen-current-property)))
+           (assoc-default 'zoom-window-buffers props)))
+        (zoom-window-use-persp
+         (let* ((persp-name (safe-persp-name (get-frame-persp)))
+                (property (assoc-default persp-name zoom-window-persp-alist)))
+           (assoc-default 'zoom-window-buffers property)))
+        (t
+         (frame-parameter (window-frame) 'zoom-window-buffers))))
+
 (defun zoom-window--restore-mode-line-face ()
   (let ((color
          (cond (zoom-window-use-elscreen
@@ -267,11 +298,23 @@ PERSP: the perspective to be killed."
           (with-demoted-errors "Warning: %S"
             (zoom-window--do-unzoom))
         (zoom-window--save-mode-line-color)
+        (zoom-window--save-buffers)
         (zoom-window--do-register-action 'window-configuration-to-register)
         (delete-other-windows)
         (set-face-background 'mode-line zoom-window-mode-line-color curframe))
       (force-mode-line-update)
       (zoom-window--toggle-enabled))))
+
+(defun zoom-window-next ()
+  "Switch to next buffer which is in zoomed frame/screen/perspective."
+  (interactive)
+  (let* ((buffers (zoom-window--get-buffers))
+         (targets (member (current-buffer) buffers)))
+    (if targets
+        (if (cdr targets)
+            (switch-to-buffer (cadr targets))
+          (switch-to-buffer (car buffers)))
+      (switch-to-buffer (car buffers)))))
 
 (provide 'zoom-window)
 
