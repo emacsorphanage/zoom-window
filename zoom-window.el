@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 ;; for byte-compile warnings
 (declare-function elscreen-get-screen-property "elscreen")
 (declare-function elscreen-get-current-screen "elscreen")
@@ -72,7 +74,7 @@
   (let* ((property (zoom-window--elscreen-current-property))
          (orig-background (assoc-default 'zoom-window-saved-color property))
          (is-zoomed (assoc-default 'zoom-window-is-zoomed property))
-         (curframe (window-frame)))
+         (curframe (window-frame nil)))
     (if is-zoomed
         (set-face-background 'mode-line zoom-window-mode-line-color curframe)
       (when orig-background
@@ -101,7 +103,7 @@ FRAME-OR-WINDOW: a frame or a window for which the switching takes place."
   (let* ((property (assoc-default persp-name zoom-window-persp-alist))
          (orig-background (assoc-default 'zoom-window-saved-color property))
          (is-zoomed (assoc-default 'zoom-window-is-zoomed property))
-         (curframe (window-frame)))
+         (curframe (window-frame nil)))
     (if is-zoomed
         (set-face-background 'mode-line zoom-window-mode-line-color curframe)
       (if orig-background
@@ -189,7 +191,7 @@ PERSP: the perspective to be killed."
                                             persp-name property zoom-window-persp-alist))))
           (t
            (set-frame-parameter
-            (window-frame) 'zoom-window-buffers buffers)))))
+            (window-frame nil) 'zoom-window-buffers buffers)))))
 
 (defun zoom-window--get-buffers ()
   (cond (zoom-window-use-elscreen
@@ -200,7 +202,7 @@ PERSP: the perspective to be killed."
                 (property (assoc-default persp-name zoom-window-persp-alist)))
            (assoc-default 'zoom-window-buffers property)))
         (t
-         (frame-parameter (window-frame) 'zoom-window-buffers))))
+         (frame-parameter (window-frame nil) 'zoom-window-buffers))))
 
 (defun zoom-window--restore-mode-line-face ()
   (let ((color
@@ -215,7 +217,7 @@ PERSP: the perspective to be killed."
                   (assoc-default 'zoom-window-saved-color property)))
 
                (t zoom-window--orig-color))))
-    (set-face-background 'mode-line color (window-frame))))
+    (set-face-background 'mode-line color (window-frame nil))))
 
 (defun zoom-window--register-name (frame)
   (let ((parent-id (frame-parameter frame 'parent-id)))
@@ -234,7 +236,7 @@ PERSP: the perspective to be killed."
                 (reg (intern (format "perspective-%s" persp-name))))
            (funcall func reg)))
 
-        (t (funcall func (zoom-window--register-name (window-frame))))))
+        (t (funcall func (zoom-window--register-name (window-frame nil))))))
 
 (defun zoom-window--toggle-enabled ()
   (cond
@@ -258,7 +260,7 @@ PERSP: the perspective to be killed."
                                     property
                                     zoom-window-persp-alist))))
 
-   (t (let* ((curframe (window-frame))
+   (t (let* ((curframe (window-frame nil))
              (status (frame-parameter curframe 'zoom-window-enabled)))
         (set-frame-parameter curframe 'zoom-window-enabled (not status))))))
 
@@ -272,7 +274,7 @@ PERSP: the perspective to be killed."
            (property (assoc-default persp-name zoom-window-persp-alist)))
       (and property (assoc-default 'zoom-window-is-zoomed property))))
 
-   (t (frame-parameter (window-frame) 'zoom-window-enabled))))
+   (t (frame-parameter (window-frame nil) 'zoom-window-enabled))))
 
 (defsubst zoom-window--goto-line (line)
   (goto-char (point-min))
@@ -291,7 +293,7 @@ PERSP: the perspective to be killed."
 (defun zoom-window-zoom ()
   (interactive)
   (let ((enabled (zoom-window--enable-p))
-        (curframe (window-frame)))
+        (curframe (window-frame nil)))
     (if (and (one-window-p) (not enabled))
         (message "There is only one window!!")
       (if enabled
