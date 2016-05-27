@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 ;; for byte-compile warnings
 (declare-function elscreen-get-screen-property "elscreen")
 (declare-function elscreen-get-current-screen "elscreen")
