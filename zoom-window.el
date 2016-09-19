@@ -286,12 +286,14 @@ PERSP: the perspective to be killed."
 
 (defun zoom-window--do-unzoom ()
   (let ((current-line (line-number-at-pos))
+        (current-column (current-column))
         (current-buf (current-buffer)))
     (zoom-window--restore-mode-line-face)
     (zoom-window--do-register-action 'jump-to-register)
     (unless (string= (buffer-name current-buf) (buffer-name))
       (switch-to-buffer current-buf))
-    (zoom-window--goto-line current-line)))
+    (zoom-window--goto-line current-line)
+    (move-to-column current-column)))
 
 ;;;###autoload
 (defun zoom-window-zoom ()
