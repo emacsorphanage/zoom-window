@@ -7,7 +7,7 @@
 
 ## Screenshot
 
-![zoom-window](image/zoom-window.gif)
+![Screenshot of zoom-window.el](image/zoom-window.gif)
 
 Background color of `mode-line` is changed when zoomed
 
