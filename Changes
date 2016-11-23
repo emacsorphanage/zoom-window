@@ -1,5 +1,9 @@
 Revision history for zoom-window.el
 
+Version 0.05  2016/11/23 syohex
+  - Drop Emacs 24.1 and 24.2 support
+  - Restore current column
+
 Version 0.04  2016/05/27 syohex
   - Fix for older Emacs(#13, #14)
 
