@@ -14,7 +14,7 @@ Background color of `mode-line` is changed when zoomed
 
 ## Requirements
 
-- Emacs 24 or higher
+- Emacs 24.3 or higher
 
 `zoom-window.el` supports elscreen and persp-mode.
 
@@ -64,7 +64,8 @@ Set `non-nil` if you use `persp-mode`
 ```lisp
 (require 'zoom-window)
 (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
-(setq zoom-window-mode-line-color "DarkGreen")
+(custom-set-variables
+ '(zoom-window-mode-line-color "DarkGreen"))
 ```
 
 ### zoom-window with [elscreen](https://github.com/knu/elscreen)
@@ -87,7 +88,8 @@ Set `non-nil` if you use `persp-mode`
   (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
 
 (require 'zoom-window)
-(setq zoom-window-use-persp t)
+(custom-set-variables
+ '(zoom-window-use-persp t))
 (zoom-window-setup)
 
 (global-set-key (kbd "C-x C-z") 'zoom-window-zoom)
