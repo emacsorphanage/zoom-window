@@ -249,7 +249,8 @@ PERSP: the perspective to be killed."
           (marker (cl-second window-context)))
       (set-window-configuration window-conf)
       (when (marker-buffer marker)
-        (goto-char marker)))))
+        (goto-char marker))
+      (remhash key zoom-window--window-configuration))))
 
 (defun zoom-window--toggle-enabled ()
   (cond
