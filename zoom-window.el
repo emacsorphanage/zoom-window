@@ -57,6 +57,7 @@
   "Color of mode-line when zoom-window is enabled"
   :type 'string)
 
+(defvar zoom-window--window-configuration (make-hash-table :test #'equal))
 (defvar zoom-window--orig-color nil)
 
 (defun zoom-window--put-alist (key value alist)
@@ -223,24 +224,32 @@ PERSP: the perspective to be killed."
                (t zoom-window--orig-color))))
     (set-face-background 'mode-line color (window-frame nil))))
 
-(defun zoom-window--register-name (frame)
-  (let ((parent-id (frame-parameter frame 'parent-id)))
-    (if (not parent-id)
-        :zoom-window ;; not support multiple frame
-      (intern (format ":zoom-window-%d" parent-id)))))
-
-(defun zoom-window--do-register-action (func)
+(defun zoom-window--configuration-key ()
   (cond (zoom-window-use-elscreen
-         (let* ((current-screen (elscreen-get-current-screen))
-                (reg (intern (format "zoom-window-%d" current-screen))))
-           (funcall func reg)))
-
+         (format "zoom-window-%d" (elscreen-get-current-screen)))
         (zoom-window-use-persp
-         (let* ((persp-name (safe-persp-name (get-frame-persp)))
-                (reg (intern (format "perspective-%s" persp-name))))
-           (funcall func reg)))
+         (let ((persp-name (safe-persp-name (get-frame-persp))))
+           (format "perspective-%s" persp-name)))
+        (t (let ((parent-id (frame-parameter (window-frame nil) 'parent-id)))
+             (if (not parent-id)
+                 :zoom-window ;; not support multiple frame
+               (format ":zoom-window-%d" parent-id))))))
 
-        (t (funcall func (zoom-window--register-name (window-frame nil))))))
+(defun zoom-window--save-window-configuration ()
+  (let ((key (zoom-window--configuration-key))
+        (window-conf (list (current-window-configuration) (point-marker))))
+    (puthash key window-conf zoom-window--window-configuration)))
+
+(defun zoom-window--restore-window-configuration ()
+  (let* ((key (zoom-window--configuration-key))
+         (window-context (gethash key zoom-window--window-configuration 'not-found)))
+    (when (eq window-context 'not-found)
+      (error "window configuration is not found"))
+    (let ((window-conf (cl-first window-context))
+          (marker (cl-second window-context)))
+      (set-window-configuration window-conf)
+      (when (marker-buffer marker)
+        (goto-char marker)))))
 
 (defun zoom-window--toggle-enabled ()
   (cond
@@ -289,7 +298,7 @@ PERSP: the perspective to be killed."
         (current-column (current-column))
         (current-buf (current-buffer)))
     (zoom-window--restore-mode-line-face)
-    (zoom-window--do-register-action 'jump-to-register)
+    (zoom-window--restore-window-configuration)
     (unless (string= (buffer-name current-buf) (buffer-name))
       (switch-to-buffer current-buf))
     (zoom-window--goto-line current-line)
@@ -307,7 +316,7 @@ PERSP: the perspective to be killed."
             (zoom-window--do-unzoom))
         (zoom-window--save-mode-line-color)
         (zoom-window--save-buffers)
-        (zoom-window--do-register-action 'window-configuration-to-register)
+        (zoom-window--save-window-configuration)
         (delete-other-windows)
         (set-face-background 'mode-line zoom-window-mode-line-color curframe))
       (force-mode-line-update)
