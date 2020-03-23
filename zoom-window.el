@@ -44,18 +44,21 @@
 
 (defcustom zoom-window-use-elscreen nil
   "non-nil means using elscreen"
-  :type 'boolean)
+  :type 'boolean
+  :group 'zoom-window)
 
 (defcustom zoom-window-use-persp nil
   "Non-nil means using persp-mode."
-  :type 'boolean)
+  :type 'boolean
+  :group 'zoom-window)
 
 (defvar zoom-window-persp-alist nil
   "Association list for working with persp-mode.")
 
 (defcustom zoom-window-mode-line-color "green"
   "Color of mode-line when zoom-window is enabled"
-  :type 'string)
+  :type 'string
+  :group 'zoom-window)
 
 (defvar zoom-window--window-configuration (make-hash-table :test #'equal))
 (defvar zoom-window--orig-color nil)
