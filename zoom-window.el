@@ -64,6 +64,7 @@
 (defvar zoom-window--orig-color nil)
 
 (defun zoom-window--put-alist (key value alist)
+  "Not documented."
   (let ((elm (assoc key alist)))
     (if elm
         (progn
@@ -72,13 +73,16 @@
       (cons (cons key value) alist))))
 
 (defsubst zoom-window--elscreen-current-property ()
+  "Not documented."
   (elscreen-get-screen-property (elscreen-get-current-screen)))
 
 (defsubst zoom-window--elscreen-current-tab-property (prop)
+  "Not documented."
   (let ((property (zoom-window--elscreen-current-property)))
     (assoc-default prop property)))
 
 (defun zoom-window--elscreen-update ()
+  "Not documented."
   (let* ((property (zoom-window--elscreen-current-property))
          (orig-background (assoc-default 'zoom-window-saved-color property))
          (is-zoomed (assoc-default 'zoom-window-is-zoomed property))
@@ -90,6 +94,7 @@
     (force-mode-line-update)))
 
 (defun zoom-window--elscreen-set-zoomed ()
+  "Not documented."
   (let* ((current-screen (elscreen-get-current-screen))
          (prop (elscreen-get-screen-property current-screen))
          (orig-mode-line (face-background 'mode-line)))
@@ -97,6 +102,7 @@
     (elscreen-set-screen-property current-screen prop)))
 
 (defun zoom-window--elscreen-set-default ()
+  "Not documented."
   (let* ((history (elscreen-get-conf-list 'screen-history))
          (current-screen (car (last history)))
          (prop (elscreen-get-screen-property current-screen)))
@@ -163,6 +169,7 @@ PERSP: the perspective to be killed."
     property))
 
 (defun zoom-window--save-mode-line-color ()
+  "Not documented."
   (cond (zoom-window-use-elscreen
          (zoom-window--elscreen-set-zoomed))
 
@@ -183,6 +190,7 @@ PERSP: the perspective to be killed."
         (t (setq zoom-window--orig-color (face-background 'mode-line)))))
 
 (defun zoom-window--save-buffers ()
+  "Not documented."
   (let ((buffers (cl-loop for window in (window-list)
                           collect (window-buffer window))))
     (cond (zoom-window-use-elscreen
@@ -213,6 +221,7 @@ PERSP: the perspective to be killed."
          (frame-parameter (window-frame nil) 'zoom-window-buffers))))
 
 (defun zoom-window--restore-mode-line-face ()
+  "Not documented."
   (let ((color
          (cond (zoom-window-use-elscreen
                 (zoom-window--elscreen-current-tab-property
@@ -228,6 +237,7 @@ PERSP: the perspective to be killed."
     (set-face-background 'mode-line color (window-frame nil))))
 
 (defun zoom-window--configuration-key ()
+  "Not documented."
   (cond (zoom-window-use-elscreen
          (format "zoom-window-%d" (elscreen-get-current-screen)))
         (zoom-window-use-persp
@@ -239,11 +249,13 @@ PERSP: the perspective to be killed."
                (format ":zoom-window-%d" parent-id))))))
 
 (defun zoom-window--save-window-configuration ()
+  "Not documented."
   (let ((key (zoom-window--configuration-key))
         (window-conf (list (current-window-configuration) (point-marker))))
     (puthash key window-conf zoom-window--window-configuration)))
 
 (defun zoom-window--restore-window-configuration ()
+  "Not documented."
   (let* ((key (zoom-window--configuration-key))
          (window-context (gethash key zoom-window--window-configuration 'not-found)))
     (when (eq window-context 'not-found)
@@ -256,6 +268,7 @@ PERSP: the perspective to be killed."
       (remhash key zoom-window--window-configuration))))
 
 (defun zoom-window--toggle-enabled ()
+  "Not documented."
   (cond
    (zoom-window-use-elscreen
     (let* ((current-screen (elscreen-get-current-screen))
@@ -282,6 +295,7 @@ PERSP: the perspective to be killed."
         (set-frame-parameter curframe 'zoom-window-enabled (not status))))))
 
 (defun zoom-window--enable-p ()
+  "Not documented."
   (cond
    (zoom-window-use-elscreen
     (zoom-window--elscreen-current-tab-property 'zoom-window-is-zoomed))
@@ -294,10 +308,12 @@ PERSP: the perspective to be killed."
    (t (frame-parameter (window-frame nil) 'zoom-window-enabled))))
 
 (defsubst zoom-window--goto-line (line)
+  "Not documented."
   (goto-char (point-min))
   (forward-line (1- line)))
 
 (defun zoom-window--do-unzoom ()
+  "Not documented."
   (let ((current-line (line-number-at-pos))
         (current-column (current-column))
         (current-buf (current-buffer)))
@@ -310,6 +326,7 @@ PERSP: the perspective to be killed."
 
 ;;;###autoload
 (defun zoom-window-zoom ()
+  "Not documented."
   (interactive)
   (let ((enabled (zoom-window--enable-p))
         (curframe (window-frame nil)))
