@@ -23,7 +23,7 @@
 ;;; Commentary:
 
 ;; zoom-window.el provides functions which zooms specific window in frame and
-;; restore original window configuration. This is like tmux's zoom/unzoom
+;; restore original window configuration.  This is like tmux's zoom/unzoom
 ;; features.
 
 ;;; Code:
@@ -43,7 +43,7 @@
   :group 'windows)
 
 (defcustom zoom-window-use-elscreen nil
-  "non-nil means using elscreen"
+  "Non-nil means using elscreen."
   :type 'boolean
   :group 'zoom-window)
 
@@ -56,7 +56,7 @@
   "Association list for working with persp-mode.")
 
 (defcustom zoom-window-mode-line-color "green"
-  "Color of mode-line when zoom-window is enabled"
+  "Color of mode-line when zoom-window is enabled."
   :type 'string
   :group 'zoom-window)
 
