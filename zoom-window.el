@@ -326,7 +326,7 @@ PERSP: the perspective to be killed."
 
 ;;;###autoload
 (defun zoom-window-zoom ()
-  "Not documented."
+  "Zoom the current window."
   (interactive)
   (let ((enabled (zoom-window--enable-p))
         (curframe (window-frame nil)))
