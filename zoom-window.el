@@ -319,8 +319,7 @@ PERSP: the perspective to be killed."
         (current-buf (current-buffer)))
     (zoom-window--restore-mode-line-face)
     (zoom-window--restore-window-configuration)
-    (unless (string= (buffer-name current-buf) (buffer-name))
-      (switch-to-buffer current-buf))
+    (pop-to-buffer current-buf)
     (zoom-window--goto-line current-line)
     (move-to-column current-column)))
 
