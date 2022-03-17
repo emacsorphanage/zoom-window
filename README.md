@@ -1,4 +1,9 @@
-# zoom-window.el [![melpa badge][melpa-badge]][melpa-link] [![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
+[![melpa badge][melpa-badge]][melpa-link] 
+[![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
+
+# zoom-window.el
+
+[![CI](https://github.com/emacsorphanage/zoom-window/actions/workflows/test.yml/badge.svg)](https://github.com/emacsorphanage/zoom-window/actions/workflows/test.yml)
 
 ## Introduction
 
