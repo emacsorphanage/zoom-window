@@ -5,7 +5,7 @@ EASK ?= eask
 
 TEST-FILES := $(shell ls test/zoom-window-*.el)
 
-.PHONY: clean checkdoc lint install compile unix-test
+.PHONY: clean checkdoc lint install compile
 
 ci: clean install compile
 
@@ -25,6 +25,6 @@ lint:
 	@echo "Linting..."
 	$(EASK) lint
 
-unix-test:
+test:
 	@echo "Testing..."
 	$(EASK) exec ert-runner -L . $(LOAD-TEST-FILES) -t '!no-win' -t '!org'
