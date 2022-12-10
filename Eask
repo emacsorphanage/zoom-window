@@ -2,7 +2,12 @@
          "0.06"
          "Zoom window like tmux")
 
+(website-url "https://github.com/syohex/emacs-zoom-window")
+(keywords "")
+
 (package-file "zoom-window.el")
+
+(script "test" "echo \"Error: no test specified\" && exit 1")
 
 (source "gnu")
 (source "melpa")
