@@ -72,6 +72,20 @@
           alist)
       (cons (cons key value) alist))))
 
+(defun zoom-window--persp-rename-hook (_perspecitve oldName newName)
+  "Meant to be used in the `persp-renamed-functions' hook. Updates
+the state of perspectives in `zoom-window' from OLDNAME to NEWNAME."
+  ;; Update `zoom-window-persp-alist'
+  (let ((oldPersp (assoc oldName zoom-window-persp-alist)))
+    (when oldPersp (setcar oldPersp newName)))
+  ;; Update `zoom-window--window-configuration'
+  (let* ((oldKey (zoom-window--configuration-key oldName))
+         (configuration (gethash oldKey zoom-window--window-configuration)))
+    (when configuration
+      (progn (puthash (zoom-window--configuration-key newName)
+                      configuration zoom-window--window-configuration)
+             (remhash oldKey zoom-window--window-configuration)))))
+
 (defsubst zoom-window--elscreen-current-property ()
   "Not documented."
   (elscreen-get-screen-property (elscreen-get-current-screen)))
@@ -144,8 +158,8 @@ PERSP: the perspective to be killed."
    (zoom-window-use-elscreen
     (setq zoom-window--orig-color (face-background 'mode-line))
 
-    (add-hook 'elscreen-create-hook 'zoom-window--elscreen-set-default)
-    (add-hook 'elscreen-screen-update-hook 'zoom-window--elscreen-update)
+    (add-hook 'elscreen-create-hook #'zoom-window--elscreen-set-default)
+    (add-hook 'elscreen-screen-update-hook #'zoom-window--elscreen-update)
     ;; for first tab
     (zoom-window--elscreen-set-default))
 
@@ -154,8 +168,9 @@ PERSP: the perspective to be killed."
     (setq zoom-window--orig-color (face-background 'mode-line))
 
     (add-hook 'persp-before-switch-functions
-              'zoom-window--persp-before-switch-hook)
-    (add-hook 'persp-before-kill-functions 'zoom-window--persp-before-kill-hook))
+              #'zoom-window--persp-before-switch-hook)
+    (add-hook 'persp-renamed-functions #'zoom-window--persp-rename-hook)
+    (add-hook 'persp-before-kill-functions #'zoom-window--persp-before-kill-hook))
 
    ;; do nothing else
    (t nil)))
@@ -236,14 +251,14 @@ PERSP: the perspective to be killed."
                (t zoom-window--orig-color))))
     (set-face-background 'mode-line color (window-frame nil))))
 
-(defun zoom-window--configuration-key ()
+(defun zoom-window--configuration-key (&optional name)
   "Not documented."
   (cond (zoom-window-use-elscreen
-         (format "zoom-window-%d" (elscreen-get-current-screen)))
+         (format "zoom-window-%d" (or name (elscreen-get-current-screen))))
         (zoom-window-use-persp
-         (let ((persp-name (safe-persp-name (get-frame-persp))))
+         (let ((persp-name (or name (safe-persp-name (get-frame-persp)))))
            (format "perspective-%s" persp-name)))
-        (t (let ((parent-id (frame-parameter (window-frame nil) 'parent-id)))
+        (t (let ((parent-id (or name (frame-parameter (window-frame nil) 'parent-id))))
              (if (not parent-id)
                  :zoom-window ;; not support multiple frame
                (format ":zoom-window-%d" parent-id))))))
