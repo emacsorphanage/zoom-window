@@ -1,2 +1,6 @@
 /.cask/
+/.eask/
 *.elc
+
+# OS generated
+.DS_Store
