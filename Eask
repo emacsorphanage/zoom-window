@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "zoom-window"
          "0.06"
          "Zoom window like tmux")
