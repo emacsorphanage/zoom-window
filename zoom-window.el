@@ -1,7 +1,7 @@
 ;;; zoom-window.el --- Zoom window like tmux -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017 by Syohei YOSHIDA
-;; Copyright (C) 2020-2024 Shen, Jen-Chieh
+;; Copyright (C) 2020-2026 Shen, Jen-Chieh
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; Maintainer: Shen, Jen-Chieh <jcs090218@gmail.com>
