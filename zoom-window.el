@@ -39,6 +39,7 @@
 (declare-function elscreen-get-conf-list "elscreen")
 (declare-function safe-persp-name "persp-mode")
 (declare-function get-frame-persp "persp-mode")
+(declare-function tab-bar-tabs "tab-bar")
 
 (defgroup zoom-window nil
   "zoom window like tmux"
@@ -51,6 +52,14 @@
 
 (defcustom zoom-window-use-persp nil
   "Non-nil means using persp-mode."
+  :type 'boolean
+  :group 'zoom-window)
+
+(defcustom zoom-window-use-tab-bar nil
+  "Non-nil means keeping zoom state isolated per `tab-bar' tab.
+
+This also works for packages such as `tabspaces' that build on top of
+`tab-bar'.  Call `zoom-window-setup' after enabling this option."
   :type 'boolean
   :group 'zoom-window)
 
@@ -152,6 +161,57 @@ PERSP: the perspective to be killed."
           (delq (assoc persp-name zoom-window-persp-alist)
                 zoom-window-persp-alist))))
 
+(defun zoom-window--tab-bar-current-tab ()
+  "Return the current `tab-bar' tab object."
+  (when (fboundp 'tab-bar-tabs)
+    (cl-find-if (lambda (tab)
+                  (eq (car tab) 'current-tab))
+                (tab-bar-tabs))))
+
+(defun zoom-window--tab-bar-current-tab-property (prop)
+  "Return current `tab-bar' PROP value."
+  (let* ((tab (zoom-window--tab-bar-current-tab))
+         (state (and tab (assoc-default 'zoom-window-state tab))))
+    (when state
+      (assoc-default prop state))))
+
+(defun zoom-window--tab-bar-put-property (prop value &optional tab)
+  "Store VALUE under PROP in TAB.
+When TAB is nil, use the current `tab-bar' tab."
+  (let* ((target (or tab (zoom-window--tab-bar-current-tab)))
+         (state (and target (assoc-default 'zoom-window-state target)))
+         (state-cell (and target (assq 'zoom-window-state target)))
+         (next-state (zoom-window--put-alist prop value state)))
+    (unless target
+      (error "Current tab-bar tab is not available"))
+    (if state-cell
+        (setcdr state-cell next-state)
+      (nconc target (list (cons 'zoom-window-state next-state))))
+    value))
+
+(defun zoom-window--tab-bar-update (&rest _)
+  "Update mode-line face for the currently selected `tab-bar' tab."
+  (let ((color (if (zoom-window--tab-bar-current-tab-property
+                    'zoom-window-is-zoomed)
+                   zoom-window-mode-line-color
+                 (or (zoom-window--tab-bar-current-tab-property
+                      'zoom-window-saved-color)
+                     zoom-window--orig-color))))
+    (set-face-background 'mode-line color (window-frame nil))
+    (force-mode-line-update)))
+
+(defun zoom-window--tab-bar-set-default (&optional tab)
+  "Reset `zoom-window' state for TAB.
+When TAB is nil, reset the current `tab-bar' tab."
+  (let ((target (or tab (zoom-window--tab-bar-current-tab))))
+    (when target
+      (zoom-window--tab-bar-put-property 'zoom-window-is-zoomed nil target)
+      (zoom-window--tab-bar-put-property 'zoom-window-saved-color
+                                         zoom-window--orig-color target)
+      (zoom-window--tab-bar-put-property 'zoom-window-buffers nil target)
+      (zoom-window--tab-bar-put-property 'zoom-window-window-configuration
+                                         nil target))))
+
 ;;;###autoload
 (defun zoom-window-setup ()
   "To work with elscreen or persp-mode."
@@ -173,6 +233,21 @@ PERSP: the perspective to be killed."
               #'zoom-window--persp-before-switch-hook)
     (add-hook 'persp-renamed-functions #'zoom-window--persp-rename-hook)
     (add-hook 'persp-before-kill-functions #'zoom-window--persp-before-kill-hook))
+
+   ;; to work with tab-bar/tabspaces
+   (zoom-window-use-tab-bar
+    (unless (require 'tab-bar nil t)
+      (error "tab-bar is not available in this Emacs"))
+
+    (setq zoom-window--orig-color (face-background 'mode-line))
+
+    (remove-hook 'tab-bar-tab-post-open-functions #'zoom-window--tab-bar-set-default)
+    (remove-hook 'tab-bar-tab-post-select-functions #'zoom-window--tab-bar-update)
+    (add-hook 'tab-bar-tab-post-open-functions #'zoom-window--tab-bar-set-default)
+    (add-hook 'tab-bar-tab-post-select-functions #'zoom-window--tab-bar-update)
+    ;; for first tab
+    (zoom-window--tab-bar-set-default)
+    (zoom-window--tab-bar-update))
 
    ;; do nothing else
    (t nil)))
@@ -204,6 +279,10 @@ PERSP: the perspective to be killed."
                                           property
                                           zoom-window-persp-alist))))
 
+        (zoom-window-use-tab-bar
+         (zoom-window--tab-bar-put-property 'zoom-window-saved-color
+                                            (face-background 'mode-line)))
+
         (t (setq zoom-window--orig-color (face-background 'mode-line)))))
 
 (defun zoom-window--save-buffers ()
@@ -222,6 +301,8 @@ PERSP: the perspective to be killed."
                              'zoom-window-buffers buffers property))
              (setq zoom-window-persp-alist (zoom-window--put-alist
                                             persp-name property zoom-window-persp-alist))))
+          (zoom-window-use-tab-bar
+           (zoom-window--tab-bar-put-property 'zoom-window-buffers buffers))
           (t
            (set-frame-parameter
             (window-frame nil) 'zoom-window-buffers buffers)))))
@@ -234,6 +315,8 @@ PERSP: the perspective to be killed."
          (let* ((persp-name (safe-persp-name (get-frame-persp)))
                 (property (assoc-default persp-name zoom-window-persp-alist)))
            (assoc-default 'zoom-window-buffers property)))
+        (zoom-window-use-tab-bar
+         (zoom-window--tab-bar-current-tab-property 'zoom-window-buffers))
         (t
          (frame-parameter (window-frame nil) 'zoom-window-buffers))))
 
@@ -249,6 +332,11 @@ PERSP: the perspective to be killed."
                        (property (assoc-default persp-name
                                                 zoom-window-persp-alist)))
                   (assoc-default 'zoom-window-saved-color property)))
+
+               (zoom-window-use-tab-bar
+                (or (zoom-window--tab-bar-current-tab-property
+                     'zoom-window-saved-color)
+                    zoom-window--orig-color))
 
                (t zoom-window--orig-color))))
     (set-face-background 'mode-line color (window-frame nil))))
@@ -267,14 +355,22 @@ PERSP: the perspective to be killed."
 
 (defun zoom-window--save-window-configuration ()
   "Not documented."
-  (let ((key (zoom-window--configuration-key))
-        (window-conf (list (current-window-configuration) (point-marker))))
-    (puthash key window-conf zoom-window--window-configuration)))
+  (let ((window-conf (list (current-window-configuration) (point-marker))))
+    (if zoom-window-use-tab-bar
+        (zoom-window--tab-bar-put-property 'zoom-window-window-configuration
+                                           window-conf)
+      (let ((key (zoom-window--configuration-key)))
+        (puthash key window-conf zoom-window--window-configuration)))))
 
 (defun zoom-window--restore-window-configuration ()
   "Not documented."
-  (let* ((key (zoom-window--configuration-key))
-         (window-context (gethash key zoom-window--window-configuration 'not-found)))
+  (let ((window-context
+         (if zoom-window-use-tab-bar
+             (or (zoom-window--tab-bar-current-tab-property
+                  'zoom-window-window-configuration)
+                 'not-found)
+           (let ((key (zoom-window--configuration-key)))
+             (gethash key zoom-window--window-configuration 'not-found)))))
     (when (eq window-context 'not-found)
       (error "window configuration is not found"))
     (let ((window-conf (cl-first window-context))
@@ -282,7 +378,11 @@ PERSP: the perspective to be killed."
       (set-window-configuration window-conf)
       (when (marker-buffer marker)
         (goto-char marker))
-      (remhash key zoom-window--window-configuration))))
+      (if zoom-window-use-tab-bar
+          (zoom-window--tab-bar-put-property 'zoom-window-window-configuration
+                                             nil)
+        (remhash (zoom-window--configuration-key)
+                 zoom-window--window-configuration)))))
 
 (defun zoom-window--toggle-enabled ()
   "Not documented."
@@ -307,6 +407,11 @@ PERSP: the perspective to be killed."
                                     property
                                     zoom-window-persp-alist))))
 
+   (zoom-window-use-tab-bar
+    (let ((value (zoom-window--tab-bar-current-tab-property
+                  'zoom-window-is-zoomed)))
+      (zoom-window--tab-bar-put-property 'zoom-window-is-zoomed (not value))))
+
    (t (let* ((curframe (window-frame nil))
              (status (frame-parameter curframe 'zoom-window-enabled)))
         (set-frame-parameter curframe 'zoom-window-enabled (not status))))))
@@ -321,6 +426,9 @@ PERSP: the perspective to be killed."
     (let* ((persp-name (safe-persp-name (get-frame-persp)))
            (property (assoc-default persp-name zoom-window-persp-alist)))
       (and property (assoc-default 'zoom-window-is-zoomed property))))
+
+   (zoom-window-use-tab-bar
+    (zoom-window--tab-bar-current-tab-property 'zoom-window-is-zoomed))
 
    (t (frame-parameter (window-frame nil) 'zoom-window-enabled))))
 
